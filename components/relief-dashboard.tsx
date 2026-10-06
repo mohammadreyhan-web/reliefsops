@@ -25,6 +25,7 @@ const incidents = [
   { id: 'INC-2026-003', type: 'Landslide', location: 'Hill Region', severity: 'High', time: '06:20 AM', people: '1,840', status: 'Monitoring', team: 'North Field Ops' },
 ]
 const requests = [
+  { id: 'INC-2026-386', location: 'Hyderabad East', need: 'Flood response', qty: '386 people affected', severity: 'High', affected: '386', urgency: 'Immediate', score: 82, status: 'Pending Approval' },
   { id: 'REQ-1024', location: 'Hyderabad', need: 'Water', qty: '1,200 L', severity: 'Critical', affected: '850', urgency: 'Immediate', score: 96, status: 'Pending Approval' },
   { id: 'REQ-1025', location: 'Warangal', need: 'Food Kits', qty: '400', severity: 'High', affected: '420', urgency: 'High', score: 88, status: 'Approved' },
   { id: 'REQ-1026', location: 'Nalgonda', need: 'Medicines', qty: '150', severity: 'High', affected: '300', urgency: 'High', score: 84, status: 'Pending' },
@@ -70,8 +71,9 @@ export default function ReliefDashboard() {
   const [showProfile, setShowProfile] = useState(false)
   const [showIncidentForm, setShowIncidentForm] = useState(false)
   const [reportedIncidents, setReportedIncidents] = useState(incidents)
+  const [reportedRequests, setReportedRequests] = useState(requests)
   const [currentTime, setCurrentTime] = useState(() => new Date())
-  const filteredRequests = useMemo(() => requests.filter(r => (filter === 'All statuses' || r.status === filter) && (!search || `${r.id} ${r.location} ${r.need}`.toLowerCase().includes(search.toLowerCase()))), [filter, search])
+  const filteredRequests = useMemo(() => reportedRequests.filter(r => (filter === 'All statuses' || r.status === filter) && (!search || `${r.id} ${r.location} ${r.need}`.toLowerCase().includes(search.toLowerCase()))), [filter, search])
   useEffect(() => {
     const timer = window.setInterval(() => setCurrentTime(new Date()), 1000)
     return () => window.clearInterval(timer)
@@ -91,7 +93,7 @@ export default function ReliefDashboard() {
         {section === 'Dashboard' ? <DashboardView onNavigate={setSection} onAction={act} onNewIncident={() => setShowIncidentForm(true)} currentTime={currentTime} /> : <ModuleView section={section} incidents={reportedIncidents} requests={filteredRequests} filter={filter} setFilter={setFilter} approved={approved} setApproved={setApproved} onAction={act} search={search} onNewIncident={() => setShowIncidentForm(true)} />}
       </div>
       {notice && <div className="toast"><Check size={16} /> {notice}</div>}
-      {showIncidentForm && <IncidentForm onClose={() => setShowIncidentForm(false)} onSubmit={(incident) => { setReportedIncidents(current => [incident, ...current]); setShowIncidentForm(false); setSection('Incidents'); act(`${incident.id} created and queued for verification`) }} />}
+      {showIncidentForm && <IncidentForm onClose={() => setShowIncidentForm(false)} onSubmit={(incident) => { setReportedIncidents(current => [incident, ...current]); setReportedRequests(current => [{ id: incident.id, location: incident.location, need: incident.type, qty: `${incident.people} people affected`, severity: incident.severity, affected: incident.people, score: incident.severity === 'Critical' ? 96 : incident.severity === 'High' ? 82 : 64, urgency: incident.severity === 'Critical' ? 'Immediate urgency' : 'Needs review', status: 'Pending Approval' }, ...current]); setShowIncidentForm(false); setSection('Relief Requests'); act(`${incident.id} added to relief requests for approval`) }} />}
     </main>
   </div>
 }
