@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { authClient } from '@/lib/auth-client'
 import {
   Activity, AlertTriangle, ArrowUpRight, Bell, Boxes, Check, ChevronDown,
   ClipboardCheck, Clock3, CloudRain, FileText, Gauge, HeartHandshake,
@@ -87,7 +88,7 @@ export default function ReliefDashboard({ role = 'admin', userName = 'Mohammad R
     return () => window.clearInterval(timer)
   }, [])
   function act(message: string) { setNotice(message); window.setTimeout(() => setNotice(''), 3000) }
-  async function signOut() { await fetch('/api/auth/sign-out', { method: 'POST' }); window.location.href = '/sign-in' }
+  async function signOut() { await authClient.signOut(); window.location.href = '/sign-in' }
   function signBackIn() { window.location.href = '/sign-in' }
 
   if (signedOut) return <main className="signed-out-screen"><section className="signed-out-card"><div className="brand-mark"><ShieldCheck size={24} /></div><span className="eyebrow">RELIEFOPS COMMAND CENTER</span><h1>You are signed out</h1><p>Your demo session has ended. Sign back in to continue coordinating relief operations.</p><button className="primary-btn" onClick={signBackIn}>Sign back in</button></section></main>
