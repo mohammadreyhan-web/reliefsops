@@ -60,7 +60,7 @@ function SectionHeader({ title, subtitle, action, onAction }: { title: string; s
   return <div className="section-header"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{action && <button className="ghost-btn" onClick={onAction}>{action} <ArrowUpRight size={14} /></button>}</div>
 }
 
-export default function ReliefDashboard() {
+export default function ReliefDashboard({ role = 'admin', userName = 'Mohammad Reyhan' }: { role?: string; userName?: string }) {
   const [section, setSection] = useState<Section>('Dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [dark, setDark] = useState(false)
@@ -87,8 +87,8 @@ export default function ReliefDashboard() {
     return () => window.clearInterval(timer)
   }, [])
   function act(message: string) { setNotice(message); window.setTimeout(() => setNotice(''), 3000) }
-  function signOut() { setShowProfile(false); setSignedOut(true); setNotice('Signed out successfully') }
-  function signBackIn() { setSignedOut(false); setNotice('Welcome back, Mohammad Reyhan') }
+  async function signOut() { await fetch('/api/auth/sign-out', { method: 'POST' }); window.location.href = '/sign-in' }
+  function signBackIn() { window.location.href = '/sign-in' }
 
   if (signedOut) return <main className="signed-out-screen"><section className="signed-out-card"><div className="brand-mark"><ShieldCheck size={24} /></div><span className="eyebrow">RELIEFOPS COMMAND CENTER</span><h1>You are signed out</h1><p>Your demo session has ended. Sign back in to continue coordinating relief operations.</p><button className="primary-btn" onClick={signBackIn}>Sign back in</button></section></main>
 
@@ -96,7 +96,7 @@ export default function ReliefDashboard() {
     <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
       <div className="brand"><div className="brand-mark"><ShieldCheck size={20} /></div><div><strong>Relief<span>Ops</span></strong><small>COMMAND CENTER</small></div><button className="sidebar-close" onClick={() => setSidebarOpen(false)}><X size={18} /></button></div>
       <div className="system-status"><span className="pulse-dot" /> <span>System operational</span><span className="status-live">LIVE</span></div>
-      <nav><div className="nav-label">OPERATIONS</div>{nav.slice(0, 7).map(({ label, icon: Icon }) => <button key={label} className={section === label ? 'active' : ''} onClick={() => { setSection(label as Section); setSidebarOpen(false) }}><Icon size={17} /><span>{label}</span>{label === 'Relief Requests' && <b className="nav-count">18</b>}</button>)}<div className="nav-label secondary-label">GOVERNANCE</div>{nav.slice(7).map(({ label, icon: Icon }) => <button key={label} className={section === label ? 'active' : ''} onClick={() => { setSection(label as Section); setSidebarOpen(false) }}><Icon size={17} /><span>{label}</span></button>)}</nav>
+      <nav><div className="nav-label">OPERATIONS</div>{nav.slice(0, 7).map(({ label, icon: Icon }) => <button key={label} className={section === label ? 'active' : ''} onClick={() => { setSection(label as Section); setSidebarOpen(false) }}><Icon size={17} /><span>{label}</span>{label === 'Relief Requests' && <b className="nav-count">18</b>}</button>)}<div className="nav-label secondary-label">GOVERNANCE</div>{nav.slice(7).filter(({ label }) => role === 'admin' || !['Users & Permissions', 'Decision Support', 'Audit Trail'].includes(label)).map(({ label, icon: Icon }) => <button key={label} className={section === label ? 'active' : ''} onClick={() => { setSection(label as Section); setSidebarOpen(false) }}><Icon size={17} /><span>{label}</span></button>)}</nav>
       <div className="sidebar-footer"><div className="project-tag"><span className="project-dot" /><div><strong>Group 13</strong><small>Database Engineering</small></div></div><small className="version">v2.4.0 · KLU Hyderabad</small></div>
     </aside>
     <main className="main-content">
