@@ -6,5 +6,6 @@ import { auth } from '@/lib/auth'
 export default async function Page() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) redirect('/sign-in')
-  return <ReliefDashboard role={(session.user as { role?: string }).role ?? 'user'} userName={session.user.name} />
+  const role = (session.user as { role?: string }).role ?? 'user'
+  redirect(role === 'admin' ? '/admin' : '/user')
 }
