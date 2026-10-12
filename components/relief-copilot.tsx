@@ -20,7 +20,8 @@ export function ReliefCopilot({ context, onClose }: Props) {
     try {
       const response = await fetch('/api/copilot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: prompt, context }) })
       const data = await response.json()
-      setMessages(current => [...current, { role: 'assistant', text: data.answer ?? data.error ?? 'No response was returned.' }])
+      if (!response.ok) throw new Error(data.error ?? 'Copilot request failed.')
+      setMessages(current => [...current, { role: 'assistant', text: data.answer ?? 'No response was returned.' }])
     } catch {
       setMessages(current => [...current, { role: 'assistant', text: 'The copilot is temporarily unavailable.' }])
     } finally {
